@@ -1,0 +1,27 @@
+{
+  "name": "easy-uploader",
+  "version": "1.0.0",
+  "description": "Self-hosted file and photo sharing app for Unraid",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "file-type": "^16.5.4",
+    "better-sqlite3": "^9.4.3",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.2.0",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

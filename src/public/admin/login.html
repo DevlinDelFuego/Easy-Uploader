@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy Uploader — Admin Login</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%;
+      max-width: 380px;
+      padding: 40px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      background: #2563eb;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .brand-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .brand p {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin-top: 4px;
+    }
+
+    .error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error.visible { display: block; }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      color: #1e293b;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      padding: 11px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.15s;
+    }
+
+    button[type="submit"]:hover { background: #1d4ed8; }
+    button[type="submit"]:active { background: #1e40af; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="16 16 12 12 8 16"></polyline>
+          <line x1="12" y1="12" x2="12" y2="21"></line>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+        </svg>
+      </div>
+      <h1>Easy Uploader</h1>
+      <p>Admin Panel</p>
+    </div>
+
+    <div class="error" id="errorMsg">Invalid username or password.</div>
+
+    <form method="POST" action="/admin/login">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit">Sign In</button>
+    </form>
+  </div>
+
+  <script>
+    if (new URLSearchParams(location.search).get('error')) {
+      document.getElementById('errorMsg').classList.add('visible');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy Uploader — Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: #1e293b;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-brand .icon {
+      width: 36px;
+      height: 36px;
+      background: #2563eb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-brand .icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sidebar-brand h1 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .sidebar-brand p {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    nav {
+      flex: 1;
+      padding: 16px 12px;
+    }
+
+    .nav-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #475569;
+      padding: 0 8px;
+      margin: 16px 0 6px;
+    }
+
+    .nav-label:first-child { margin-top: 0; }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 10px;
+      border-radius: 7px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    nav a svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+
+    nav a:hover { background: rgba(255,255,255,0.06); color: #f1f5f9; }
+    nav a.active { background: rgba(37,99,235,0.2); color: #93c5fd; }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 10px;
+      background: none;
+      border: none;
+      border-radius: 7px;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .logout-btn svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .logout-btn:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
+
+    /* Main content */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .content {
+      padding: 28px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .placeholder {
+      background: #fff;
+      border-radius: 10px;
+      padding: 48px 28px;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .placeholder p {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="16 16 12 12 8 16"></polyline>
+          <line x1="12" y1="12" x2="12" y2="21"></line>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+        </svg>
+      </div>
+      <h1>Easy Uploader</h1>
+      <p>Admin Panel</p>
+    </div>
+
+    <nav>
+      <div class="nav-label">Manage</div>
+
+      <a href="/admin/dashboard" class="active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+      </a>
+
+      <a href="/admin/shares">
+        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        Shares
+      </a>
+
+      <a href="/admin/files">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        All Files
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <form method="POST" action="/admin/logout">
+        <button type="submit" class="logout-btn">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Sign Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h2>Dashboard</h2>
+    </div>
+
+    <div class="content">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">Total Shares</div>
+          <div class="value" id="statShares">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Uploads</div>
+          <div class="value" id="statUploads">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Active Shares</div>
+          <div class="value" id="statActive">—</div>
+        </div>
+      </div>
+
+      <div class="placeholder">
+        <p>Use the <strong>Shares</strong> menu to create your first share link.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    fetch('/admin/api/stats')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('statShares').textContent  = d.totalShares;
+        document.getElementById('statUploads').textContent = d.totalUploads;
+        document.getElementById('statActive').textContent  = d.activeShares;
+      });
+  </script>
+</body>
+</html>

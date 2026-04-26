@@ -1,0 +1,18 @@
+services:
+  easy-uploader:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme
+      - SESSION_SECRET=dev-secret-change-this
+      - PORT=3000
+      - MAX_FILE_SIZE_MB=500
+      - NODE_ENV=development
+      - PUID=1000
+      - PGID=1000
+    restart: unless-stopped

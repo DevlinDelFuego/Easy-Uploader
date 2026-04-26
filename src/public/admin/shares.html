@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy Uploader — Shares</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ─────────────────────────── */
+    .sidebar {
+      width: 240px; min-width: 240px;
+      background: #1e293b;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh;
+    }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sidebar-brand .icon {
+      width: 36px; height: 36px; background: #2563eb; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+    }
+    .sidebar-brand .icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .sidebar-brand h1 { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+    .sidebar-brand p { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
+    nav { flex: 1; padding: 16px 12px; }
+    .nav-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; padding: 0 8px; margin: 16px 0 6px; }
+    .nav-label:first-child { margin-top: 0; }
+    nav a {
+      display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 7px;
+      color: #94a3b8; text-decoration: none; font-size: 0.875rem; font-weight: 500;
+      transition: background 0.12s, color 0.12s;
+    }
+    nav a svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    nav a:hover { background: rgba(255,255,255,0.06); color: #f1f5f9; }
+    nav a.active { background: rgba(37,99,235,0.2); color: #93c5fd; }
+    .sidebar-footer { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px;
+      background: none; border: none; border-radius: 7px; color: #94a3b8;
+      font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    .logout-btn svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .logout-btn:hover { background: rgba(239,68,68,0.12); color: #fca5a5; }
+
+    /* ── Main ────────────────────────────── */
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      background: #fff; border-bottom: 1px solid #e2e8f0;
+      padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar h2 { font-size: 1.1rem; font-weight: 600; }
+    .btn-primary {
+      display: flex; align-items: center; gap: 7px;
+      background: #2563eb; color: #fff; border: none; border-radius: 8px;
+      padding: 9px 16px; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .content { padding: 28px; }
+
+    /* ── Table ───────────────────────────── */
+    .table-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; padding: 12px 16px;
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+    }
+    tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbfc; }
+    td { padding: 13px 16px; font-size: 0.875rem; color: #334155; vertical-align: middle; }
+    td.name { font-weight: 500; color: #1e293b; }
+    td.url a { color: #2563eb; text-decoration: none; font-family: monospace; font-size: 0.8125rem; }
+    td.url a:hover { text-decoration: underline; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600;
+      border: none; cursor: pointer; transition: opacity 0.15s;
+    }
+    .badge:hover { opacity: 0.8; }
+    .badge.active { background: #dcfce7; color: #15803d; }
+    .badge.inactive { background: #f1f5f9; color: #64748b; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .actions { display: flex; gap: 8px; }
+    .btn-sm {
+      padding: 5px 12px; border-radius: 6px; font-size: 0.8125rem; font-weight: 500;
+      cursor: pointer; border: 1px solid; transition: background 0.12s, color 0.12s;
+    }
+    .btn-edit { background: #fff; border-color: #d1d5db; color: #374151; }
+    .btn-edit:hover { background: #f9fafb; }
+    .btn-delete { background: #fff; border-color: #fca5a5; color: #dc2626; }
+    .btn-delete:hover { background: #fef2f2; }
+
+    /* ── Empty state ─────────────────────── */
+    .empty {
+      padding: 64px 28px; text-align: center;
+    }
+    .empty svg { width: 40px; height: 40px; stroke: #cbd5e1; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 12px; }
+    .empty p { color: #94a3b8; font-size: 0.9rem; }
+    .empty p strong { color: #64748b; }
+
+    /* ── Modal ───────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      width: 100%; max-width: 460px; padding: 28px; position: relative;
+    }
+    .modal h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 22px; }
+    .field { margin-bottom: 18px; }
+    .field label { display: block; font-size: 0.8125rem; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    .field input[type="text"],
+    .field input[type="password"],
+    .field input[type="date"] {
+      width: 100%; padding: 9px 12px; border: 1px solid #d1d5db; border-radius: 8px;
+      font-size: 0.9rem; color: #1e293b; outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .field .hint { font-size: 0.75rem; color: #94a3b8; margin-top: 5px; }
+    .field .url-preview { font-size: 0.8rem; color: #2563eb; font-family: monospace; margin-top: 5px; }
+    .field .error-msg { font-size: 0.75rem; color: #dc2626; margin-top: 5px; display: none; }
+    .field .error-msg.visible { display: block; }
+
+    .expiry-toggle { display: flex; align-items: center; gap: 8px; }
+    .expiry-toggle input[type="checkbox"] { width: 16px; height: 16px; accent-color: #2563eb; cursor: pointer; }
+    .expiry-toggle label { font-size: 0.875rem; color: #374151; cursor: pointer; margin: 0; }
+    #expiryDate { margin-top: 10px; display: none; }
+
+    .modal-alert {
+      background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c;
+      border-radius: 8px; padding: 10px 12px; font-size: 0.8125rem;
+      margin-bottom: 16px; display: none;
+    }
+    .modal-alert.visible { display: block; }
+
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+    .btn-cancel {
+      padding: 9px 18px; border-radius: 8px; border: 1px solid #d1d5db;
+      background: #fff; color: #374151; font-size: 0.875rem; font-weight: 500; cursor: pointer;
+    }
+    .btn-cancel:hover { background: #f9fafb; }
+    .btn-save {
+      padding: 9px 20px; border-radius: 8px; border: none;
+      background: #2563eb; color: #fff; font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-save:hover { background: #1d4ed8; }
+    .btn-save:disabled { background: #93c5fd; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="icon">
+        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+      </div>
+      <h1>Easy Uploader</h1>
+      <p>Admin Panel</p>
+    </div>
+    <nav>
+      <div class="nav-label">Manage</div>
+      <a href="/admin/dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+      </a>
+      <a href="/admin/shares" class="active">
+        <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+        Shares
+      </a>
+      <a href="/admin/files">
+        <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        All Files
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <form method="POST" action="/admin/logout">
+        <button type="submit" class="logout-btn">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Sign Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h2>Shares</h2>
+      <button class="btn-primary" onclick="openCreateModal()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        New Share
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="table-card" id="tableCard">
+        <div class="empty" id="emptyState" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+          <p>No shares yet. Click <strong>New Share</strong> to create one.</p>
+        </div>
+        <table id="sharesTable" style="display:none">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Share URL</th>
+              <th>Files</th>
+              <th>Expires</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sharesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create / Edit Modal -->
+  <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <h3 id="modalTitle">New Share</h3>
+      <div class="modal-alert" id="modalAlert"></div>
+
+      <div class="field">
+        <label for="inputName">Name</label>
+        <input type="text" id="inputName" placeholder="Mother's Day Photos" autocomplete="off">
+      </div>
+
+      <div class="field">
+        <label for="inputSlug">URL Slug</label>
+        <input type="text" id="inputSlug" placeholder="mothers-day" autocomplete="off">
+        <div class="url-preview" id="slugPreview">/s/</div>
+        <div class="error-msg" id="slugError">Slug must be lowercase letters, numbers, and hyphens.</div>
+      </div>
+
+      <div class="field">
+        <label for="inputPassword" id="passwordLabel">Password</label>
+        <input type="password" id="inputPassword" placeholder="Share access password">
+        <div class="hint" id="passwordHint"></div>
+      </div>
+
+      <div class="field">
+        <div class="expiry-toggle">
+          <input type="checkbox" id="expiryEnabled" onchange="toggleExpiry()">
+          <label for="expiryEnabled">Set expiry date</label>
+        </div>
+        <input type="date" id="expiryDate">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" id="saveBtn" type="button" onclick="submitShare()">Create Share</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let allShares = [];
+    let editingId = null;
+    let slugEdited = false;
+
+    // ── Init ──────────────────────────────────────
+    loadShares();
+
+    // ── Data ──────────────────────────────────────
+    async function loadShares() {
+      const res = await fetch('/admin/api/shares');
+      allShares = await res.json();
+      renderShares();
+    }
+
+    function renderShares() {
+      const tbody = document.getElementById('sharesBody');
+      const table = document.getElementById('sharesTable');
+      const empty = document.getElementById('emptyState');
+
+      if (allShares.length === 0) {
+        table.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+      table.style.display = 'table';
+
+      tbody.innerHTML = allShares.map(s => `
+        <tr id="row-${s.id}">
+          <td class="name">${esc(s.name)}</td>
+          <td class="url"><a href="/s/${esc(s.slug)}" target="_blank">/s/${esc(s.slug)}</a></td>
+          <td>${s.file_count}</td>
+          <td>${s.expires_at ? fmtDate(s.expires_at) : '<span style="color:#94a3b8">Never</span>'}</td>
+          <td>
+            <button class="badge ${s.active ? 'active' : 'inactive'}"
+              onclick="toggleActive(${s.id}, ${s.active ? 'true' : 'false'})">
+              ${s.active ? 'Active' : 'Inactive'}
+            </button>
+          </td>
+          <td class="actions">
+            <button class="btn-sm btn-edit" onclick="openEditModal(${s.id})">Edit</button>
+            <button class="btn-sm btn-delete" onclick="deleteShare(${s.id}, '${escJs(s.name)}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ── Actions ───────────────────────────────────
+    async function toggleActive(id, current) {
+      await apiFetch(`/admin/api/shares/${id}`, 'PATCH', { active: !current });
+      loadShares();
+    }
+
+    async function deleteShare(id, name) {
+      if (!confirm(`Delete "${name}"?\n\nAll uploaded files for this share will be permanently deleted. This cannot be undone.`)) return;
+      const res = await apiFetch(`/admin/api/shares/${id}`, 'DELETE');
+      if (res.ok) loadShares();
+    }
+
+    // ── Modal: open ───────────────────────────────
+    function openCreateModal() {
+      editingId = null;
+      slugEdited = false;
+      clearModal();
+      document.getElementById('modalTitle').textContent = 'New Share';
+      document.getElementById('passwordLabel').textContent = 'Password';
+      document.getElementById('passwordHint').textContent = '';
+      document.getElementById('saveBtn').textContent = 'Create Share';
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('inputName').focus();
+    }
+
+    function openEditModal(id) {
+      const share = allShares.find(s => s.id === id);
+      if (!share) return;
+
+      editingId = id;
+      slugEdited = true;
+      clearModal();
+
+      document.getElementById('modalTitle').textContent = 'Edit Share';
+      document.getElementById('passwordLabel').textContent = 'New Password';
+      document.getElementById('passwordHint').textContent = 'Leave blank to keep the current password.';
+      document.getElementById('saveBtn').textContent = 'Save Changes';
+
+      document.getElementById('inputName').value = share.name;
+      document.getElementById('inputSlug').value = share.slug;
+      document.getElementById('slugPreview').textContent = '/s/' + share.slug;
+
+      if (share.expires_at) {
+        document.getElementById('expiryEnabled').checked = true;
+        document.getElementById('expiryDate').style.display = 'block';
+        document.getElementById('expiryDate').value = share.expires_at.slice(0, 10);
+      }
+
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('inputName').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('open');
+      clearModal();
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('overlay')) closeModal();
+    }
+
+    function clearModal() {
+      document.getElementById('inputName').value = '';
+      document.getElementById('inputSlug').value = '';
+      document.getElementById('inputPassword').value = '';
+      document.getElementById('slugPreview').textContent = '/s/';
+      document.getElementById('expiryEnabled').checked = false;
+      document.getElementById('expiryDate').value = '';
+      document.getElementById('expiryDate').style.display = 'none';
+      hideAlert();
+      document.getElementById('slugError').classList.remove('visible');
+    }
+
+    // ── Modal: submit ─────────────────────────────
+    async function submitShare() {
+      const name     = document.getElementById('inputName').value.trim();
+      const slug     = document.getElementById('inputSlug').value.trim();
+      const password = document.getElementById('inputPassword').value;
+      const expiryOn = document.getElementById('expiryEnabled').checked;
+      const expiryVal= document.getElementById('expiryDate').value;
+
+      if (!name)           return showAlert('Name is required.');
+      if (!slug)           return showAlert('URL slug is required.');
+      if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) return showAlert('Slug must be lowercase letters, numbers, and hyphens.');
+      if (!editingId && !password) return showAlert('Password is required.');
+
+      const body = { name, slug };
+      if (password) body.password = password;
+      if (expiryOn && expiryVal) body.expires_at = expiryVal;
+      else if (!expiryOn) body.expires_at = null;
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+
+      const url    = editingId ? `/admin/api/shares/${editingId}` : '/admin/api/shares';
+      const method = editingId ? 'PATCH' : 'POST';
+      const res    = await apiFetch(url, method, body);
+
+      saveBtn.disabled = false;
+
+      if (res.ok) {
+        closeModal();
+        loadShares();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showAlert(data.error || 'Something went wrong. Please try again.');
+      }
+    }
+
+    // ── Slug auto-generation ──────────────────────
+    document.getElementById('inputName').addEventListener('input', e => {
+      if (slugEdited) return;
+      const slug = e.target.value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/, '');
+      document.getElementById('inputSlug').value = slug;
+      document.getElementById('slugPreview').textContent = '/s/' + (slug || '');
+    });
+
+    document.getElementById('inputSlug').addEventListener('input', e => {
+      slugEdited = e.target.value !== '';
+      document.getElementById('slugPreview').textContent = '/s/' + e.target.value;
+      const valid = /^[a-z0-9][a-z0-9-]*$/.test(e.target.value) || e.target.value === '';
+      document.getElementById('slugError').classList.toggle('visible', !valid && e.target.value !== '');
+    });
+
+    document.getElementById('inputSlug').addEventListener('blur', e => {
+      if (e.target.value === '') slugEdited = false;
+    });
+
+    // ── Expiry toggle ─────────────────────────────
+    function toggleExpiry() {
+      const show = document.getElementById('expiryEnabled').checked;
+      document.getElementById('expiryDate').style.display = show ? 'block' : 'none';
+    }
+
+    // ── Helpers ───────────────────────────────────
+    async function apiFetch(url, method, body) {
+      return fetch(url, {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : {},
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    }
+
+    function showAlert(msg) {
+      const el = document.getElementById('modalAlert');
+      el.textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function hideAlert() {
+      const el = document.getElementById('modalAlert');
+      el.textContent = '';
+      el.classList.remove('visible');
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escJs(str) {
+      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    }
+
+    function fmtDate(iso) {
+      return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy Uploader</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .card {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      width: 100%; max-width: 400px; padding: 40px 36px;
+    }
+    .brand {
+      text-align: center; margin-bottom: 28px;
+    }
+    .brand-icon {
+      width: 56px; height: 56px; background: #2563eb; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+    }
+    .brand-icon svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .share-name { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .subtitle { font-size: 0.875rem; color: #64748b; }
+
+    .alert {
+      border-radius: 8px; padding: 11px 14px; font-size: 0.875rem;
+      margin-bottom: 20px; display: none;
+    }
+    .alert.error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+    .alert.warn  { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .alert.visible { display: block; }
+
+    .field { margin-bottom: 20px; }
+    label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 6px; }
+    input[type="password"] {
+      width: 100%; padding: 11px 14px; border: 1px solid #d1d5db; border-radius: 9px;
+      font-size: 1rem; color: #1e293b; outline: none; transition: border-color 0.15s;
+    }
+    input[type="password"]:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    button[type="submit"] {
+      width: 100%; padding: 12px; background: #2563eb; color: #fff; border: none;
+      border-radius: 9px; font-size: 0.9375rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    button[type="submit"]:hover { background: #1d4ed8; }
+    .footer { text-align: center; margin-top: 24px; font-size: 0.75rem; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+      </div>
+      <div class="share-name" id="shareName">Loading…</div>
+      <div class="subtitle" id="subtitle">Enter the password to upload files</div>
+    </div>
+
+    <div class="alert error" id="errorAlert"></div>
+    <div class="alert warn"  id="warnAlert"></div>
+
+    <form id="authForm" method="POST">
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" autofocus required>
+      </div>
+      <button type="submit">Continue</button>
+    </form>
+
+    <div class="footer">Powered by Easy Uploader</div>
+  </div>
+
+  <script>
+    const slug = location.pathname.split('/')[2];
+    document.getElementById('authForm').action = `/s/${slug}/auth`;
+
+    const params = new URLSearchParams(location.search);
+    const errorCode = params.get('error');
+
+    fetch(`/s/${slug}/info`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('shareName').textContent = 'Share Not Found';
+          document.getElementById('subtitle').textContent = 'This share link does not exist.';
+          document.getElementById('authForm').style.display = 'none';
+          return;
+        }
+
+        document.getElementById('shareName').textContent = data.name;
+
+        if (data.status === 'expired') {
+          document.getElementById('subtitle').textContent = 'This share has expired.';
+          showWarn('This share link has expired and is no longer accepting uploads.');
+          document.getElementById('authForm').style.display = 'none';
+          return;
+        }
+
+        if (data.status === 'inactive') {
+          document.getElementById('subtitle').textContent = 'This share is not available.';
+          showWarn('This share has been disabled.');
+          document.getElementById('authForm').style.display = 'none';
+          return;
+        }
+
+        document.title = `Upload to ${data.name}`;
+
+        if (errorCode === '1') showError('Incorrect password. Please try again.');
+        else if (errorCode === 'expired') showWarn('This share has expired.');
+        else if (errorCode === 'unavailable') showWarn('This share is not available.');
+      })
+      .catch(() => {
+        document.getElementById('shareName').textContent = 'Unavailable';
+        document.getElementById('authForm').style.display = 'none';
+      });
+
+    function showError(msg) {
+      const el = document.getElementById('errorAlert');
+      el.textContent = msg; el.classList.add('visible');
+    }
+    function showWarn(msg) {
+      const el = document.getElementById('warnAlert');
+      el.textContent = msg; el.classList.add('visible');
+    }
+  </script>
+</body>
+</html>
