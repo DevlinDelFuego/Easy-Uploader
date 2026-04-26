@@ -12,7 +12,8 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY src/ ./src/
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh \
+RUN sed -i 's/\r$//' /entrypoint.sh \
+    && chmod +x /entrypoint.sh \
     && mkdir -p /app/data /app/uploads
 EXPOSE 3000
 ENTRYPOINT ["/entrypoint.sh"]

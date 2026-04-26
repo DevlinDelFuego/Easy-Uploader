@@ -8,6 +8,8 @@ const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
+router.get('/', (req, res) => res.redirect('/admin/login'));
+
 router.get('/login', (req, res) => {
   if (req.session.isAdmin) return res.redirect('/admin/dashboard');
   res.sendFile(path.join(__dirname, '..', 'public', 'admin', 'login.html'));

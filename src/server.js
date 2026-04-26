@@ -40,11 +40,12 @@ app.use(session({
 }));
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.get('/admin', (req, res) => res.redirect('/admin/login'));
 app.use('/admin', require('./routes/admin'));
 app.use('/admin', require('./routes/adminShares'));
 app.use('/', require('./routes/share'));
 
-app.get('/', (req, res) => res.redirect('/admin'));
+app.get('/', (req, res) => res.redirect('/admin/login'));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
