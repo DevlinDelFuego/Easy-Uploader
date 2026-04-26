@@ -46,6 +46,7 @@ app.use(helmet({
       imgSrc: ["'self'", 'data:', 'blob:'],
     },
   },
+  hsts: false,
 }));
 
 app.use(express.json());
@@ -61,7 +62,7 @@ app.use(session({
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.COOKIE_SECURE === 'true',
     maxAge: 8 * 60 * 60 * 1000,
   },
 }));
