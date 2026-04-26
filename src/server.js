@@ -4,7 +4,32 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const path = require('path');
-const { migrate, seedAdmin } = require('./db');
+const { db, migrate, seedAdmin } = require('./db');
+
+class SQLiteStore extends session.Store {
+  constructor() {
+    super();
+    db.exec(`CREATE TABLE IF NOT EXISTS sessions (
+      sid     TEXT PRIMARY KEY,
+      data    TEXT NOT NULL,
+      expires INTEGER NOT NULL
+    )`);
+    setInterval(() => db.prepare('DELETE FROM sessions WHERE expires < ?').run(Date.now()), 15 * 60 * 1000).unref();
+  }
+  get(sid, cb) {
+    const row = db.prepare('SELECT data, expires FROM sessions WHERE sid = ?').get(sid);
+    if (!row || row.expires < Date.now()) return cb(null, null);
+    try { cb(null, JSON.parse(row.data)); } catch (e) { cb(e); }
+  }
+  set(sid, sess, cb) {
+    const expires = sess.cookie?.expires ? new Date(sess.cookie.expires).getTime() : Date.now() + 8 * 60 * 60 * 1000;
+    try { db.prepare('INSERT OR REPLACE INTO sessions (sid, data, expires) VALUES (?, ?, ?)').run(sid, JSON.stringify(sess), expires); cb(null); } catch (e) { cb(e); }
+  }
+  destroy(sid, cb) {
+    db.prepare('DELETE FROM sessions WHERE sid = ?').run(sid);
+    cb(null);
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +54,7 @@ app.use(cookieParser());
 
 app.use(session({
   name: 'admin.sid',
+  store: new SQLiteStore(),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
@@ -41,6 +67,7 @@ app.use(session({
 }));
 
 app.use('/public', express.static(path.join(__dirname, 'public')));
+app.get('/icon.png', (req, res) => res.sendFile(path.join(__dirname, '..', 'icon.png')));
 app.get('/admin', (req, res) => res.redirect('/admin/login'));
 app.use('/admin', require('./routes/admin'));
 app.use('/admin', require('./routes/adminShares'));

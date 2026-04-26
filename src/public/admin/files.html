@@ -15,8 +15,7 @@
     /* ── Sidebar (shared) ── */
     .sidebar { width: 240px; min-width: 240px; background: #1e293b; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; }
     .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .sidebar-brand .icon { width: 36px; height: 36px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-    .sidebar-brand .icon svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .sidebar-brand .icon { width: 48px; height: 48px; border-radius: 8px; margin-bottom: 10px; object-fit: contain; }
     .sidebar-brand h1 { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
     .sidebar-brand p { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; }
     nav { flex: 1; padding: 16px 12px; }
@@ -124,9 +123,7 @@
 
   <aside class="sidebar">
     <div class="sidebar-brand">
-      <div class="icon">
-        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
-      </div>
+      <img class="icon" src="/icon.png" alt="Easy Uploader">
       <h1>Easy Uploader</h1>
       <p>Admin Panel</p>
     </div>

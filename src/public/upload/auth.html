@@ -19,11 +19,7 @@
     .brand {
       text-align: center; margin-bottom: 28px;
     }
-    .brand-icon {
-      width: 56px; height: 56px; background: #2563eb; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
-    }
-    .brand-icon svg { width: 30px; height: 30px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .brand-icon { width: 64px; height: 64px; border-radius: 14px; object-fit: contain; margin: 0 auto 14px; display: block; }
     .share-name { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
     .subtitle { font-size: 0.875rem; color: #64748b; }
 
@@ -54,9 +50,7 @@
 <body>
   <div class="card">
     <div class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
-      </div>
+      <img class="brand-icon" src="/icon.png" alt="Easy Uploader">
       <div class="share-name" id="shareName">Loading…</div>
       <div class="subtitle" id="subtitle">Enter the password to upload files</div>
     </div>

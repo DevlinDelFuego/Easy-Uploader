@@ -31,24 +31,12 @@
     }
 
     .brand-icon {
-      width: 52px;
-      height: 52px;
-      background: #2563eb;
+      width: 64px;
+      height: 64px;
       border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      object-fit: contain;
       margin: 0 auto 14px;
-    }
-
-    .brand-icon svg {
-      width: 28px;
-      height: 28px;
-      fill: none;
-      stroke: #fff;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+      display: block;
     }
 
     .brand h1 {
@@ -126,13 +114,7 @@
 <body>
   <div class="card">
     <div class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24">
-          <polyline points="16 16 12 12 8 16"></polyline>
-          <line x1="12" y1="12" x2="12" y2="21"></line>
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
-        </svg>
-      </div>
+      <img class="brand-icon" src="/icon.png" alt="Easy Uploader">
       <h1>Easy Uploader</h1>
       <p>Admin Panel</p>
     </div>
