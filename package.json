@@ -1,6 +1,6 @@
 {
   "name": "easy-uploader",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Self-hosted file and photo sharing app for Unraid",
   "main": "src/server.js",
   "scripts": {

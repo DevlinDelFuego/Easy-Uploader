@@ -36,7 +36,10 @@ router.post('/login', authLimiter, [
   req.session.regenerate(err => {
     if (err) return res.redirect('/admin/login?error=1');
     req.session.isAdmin = true;
-    res.redirect('/admin/dashboard');
+    req.session.save(saveErr => {
+      if (saveErr) return res.redirect('/admin/login?error=1');
+      res.redirect('/admin/dashboard');
+    });
   });
 });
 
