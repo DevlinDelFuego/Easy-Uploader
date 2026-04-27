@@ -72,8 +72,20 @@ app.use(session({
   },
 }));
 
+app.get('/debug-proxy', (req, res) => {
+  res.json({
+    secure: req.secure,
+    ip: req.ip,
+    proto: req.headers['x-forwarded-proto'],
+    host: req.headers['x-forwarded-host'],
+    for: req.headers['x-forwarded-for'],
+    cfVisitor: req.headers['cf-visitor'],
+  });
+});
+
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.get('/icon.png', (req, res) => res.sendFile(path.join(__dirname, '..', 'icon.png')));
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, '..', 'icon.png')));
 app.get('/admin', (req, res) => res.redirect('/admin/login'));
 app.use('/admin', require('./routes/admin'));
 app.use('/admin', require('./routes/adminShares'));
