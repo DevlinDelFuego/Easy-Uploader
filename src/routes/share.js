@@ -100,7 +100,7 @@ router.post('/s/:slug/auth', authLimiter, [body('password').notEmpty()], async (
       res.cookie(GUEST_COOKIE, uuidv4(), {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.COOKIE_SECURE === 'true',
         maxAge: GUEST_COOKIE_MAX_AGE,
       });
     }
