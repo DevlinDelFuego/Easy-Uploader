@@ -17,7 +17,7 @@ A self-hosted file and photo sharing app for Unraid. Create password-protected s
 ```yaml
 services:
   easy-uploader:
-    image: devlindelfulego/easy-uploader:latest
+    image: devlindelfuego/easy-uploader:latest
     ports:
       - "3000:3000"
     volumes:
@@ -29,6 +29,8 @@ services:
       - SESSION_SECRET=your-long-random-secret
       - MAX_FILE_SIZE_MB=500
       - NODE_ENV=production
+      - COOKIE_SECURE=false
+      - TRUST_PROXY=false
       - PUID=99
       - PGID=100
     restart: unless-stopped
@@ -60,7 +62,7 @@ Map the uploads root to wherever you want files on your array.
 
 ## Reverse Proxy
 
-Run Easy Uploader behind Nginx Proxy Manager or SWAG for HTTPS. Keep `NODE_ENV=production` so session cookies are marked secure.
+Run Easy Uploader behind Nginx Proxy Manager or SWAG for HTTPS. Set `COOKIE_SECURE=true` and `TRUST_PROXY=true` when behind a reverse proxy so session cookies are marked secure and client IPs are forwarded correctly.
 
 ## Environment Variables
 
@@ -71,7 +73,9 @@ Run Easy Uploader behind Nginx Proxy Manager or SWAG for HTTPS. Keep `NODE_ENV=p
 | `SESSION_SECRET` | — | **Yes** | Long random string for signing cookies — generate at [generate-secret.vercel.app](https://generate-secret.vercel.app/64) |
 | `PORT` | `3000` | No | Port the app listens on |
 | `MAX_FILE_SIZE_MB` | `500` | No | Max upload size per file in MB |
-| `NODE_ENV` | `production` | No | Set to `production` for secure HTTPS cookies |
+| `NODE_ENV` | `production` | No | Node.js environment — keep as `production` |
+| `COOKIE_SECURE` | `false` | No | Set to `true` only when accessing over HTTPS via a reverse proxy |
+| `TRUST_PROXY` | `false` | No | Set to `true` only when running behind a reverse proxy (Nginx Proxy Manager, SWAG, etc.) |
 | `PUID` | `99` | No | UID the process runs as (99 = nobody on Unraid) |
 | `PGID` | `100` | No | GID the process runs as (100 = users on Unraid) |
 
