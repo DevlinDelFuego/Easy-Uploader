@@ -4,3 +4,4 @@ uploads/
 .env
 TODO.md
 easy-uploader.xml
+build.ps1
