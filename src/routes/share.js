@@ -22,10 +22,27 @@ const GUEST_COOKIE = 'guest_token';
 const GUEST_COOKIE_MAX_AGE = 10 * 24 * 60 * 60 * 1000;
 
 const BLOCKED_MIME = new Set([
-  'application/x-executable', 'application/x-msdownload', 'application/x-sh',
-  'application/x-php', 'text/x-php', 'application/javascript', 'text/javascript',
-  'application/x-python', 'application/x-httpd-php', 'application/x-msdos-program',
-  'application/x-bat', 'application/x-csh', 'application/x-perl',
+  'application/x-executable', 'application/x-msdownload', 'application/x-msdos-program',
+  'application/x-sh', 'application/x-bat', 'application/x-csh', 'application/x-perl',
+  'application/x-php', 'text/x-php', 'application/x-httpd-php',
+  'application/javascript', 'text/javascript',
+  'application/x-python', 'text/x-python',
+  'application/x-msi', 'application/x-ole-storage',
+  'application/x-powershell', 'application/vnd.ms-powerpoint.addin',
+  'application/x-vbscript', 'text/vbscript',
+  'application/java-archive', 'application/x-java-archive',
+]);
+
+const BLOCKED_EXT = new Set([
+  '.exe', '.msi', '.dll', '.bat', '.cmd', '.com', '.scr', '.pif', '.vbs', '.vbe',
+  '.js', '.jse', '.ws', '.wsf', '.wsc', '.wsh', '.ps1', '.ps2', '.psc1', '.psc2',
+  '.sh', '.bash', '.zsh', '.fish', '.csh', '.ksh',
+  '.php', '.php3', '.php4', '.php5', '.phtml',
+  '.py', '.pyc', '.pyo', '.pyw',
+  '.rb', '.pl', '.cgi',
+  '.jar', '.class', '.war', '.ear',
+  '.app', '.pkg', '.dmg', '.deb', '.rpm',
+  '.reg', '.inf', '.ins', '.isu',
 ]);
 
 const storage = multer.diskStorage({
@@ -44,9 +61,9 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    if (BLOCKED_MIME.has(file.mimetype)) {
-      return cb(new Error(`File type not allowed: ${file.mimetype}`));
-    }
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (BLOCKED_EXT.has(ext)) return cb(new Error(`File type not allowed: ${ext}`));
+    if (BLOCKED_MIME.has(file.mimetype)) return cb(new Error(`File type not allowed: ${file.mimetype}`));
     cb(null, true);
   },
   limits: { fileSize: MAX_FILE_SIZE, files: 20 },
