@@ -36,6 +36,20 @@ const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', process.env.TRUST_PROXY === 'true');
 
+// Cloudflare sits in front of NPM using Flexible SSL, so NPM→app is HTTP and
+// X-Forwarded-Proto arrives as "http" even though the browser used HTTPS.
+// CF-Visitor is authoritative for the real browser scheme — patch the header
+// so req.secure and express-session both see the correct protocol.
+if (process.env.TRUST_PROXY === 'true') {
+  app.use((req, res, next) => {
+    try {
+      const cf = JSON.parse(req.headers['cf-visitor'] || '{}');
+      if (cf.scheme === 'https') req.headers['x-forwarded-proto'] = 'https';
+    } catch {}
+    next();
+  });
+}
+
 app.use(helmet({
   contentSecurityPolicy: {
     useDefaults: false,
