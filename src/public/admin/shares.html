@@ -158,6 +158,74 @@
     }
     .btn-save:hover { background: #1d4ed8; }
     .btn-save:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    .hamburger {
+      display: none;
+      align-items: center;
+      padding: 4px 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #374151;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .hamburger:hover { background: #f1f5f9; }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.45);
+      z-index: 49;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 767px) {
+      .hamburger { display: flex; }
+      .sidebar { left: -240px; transition: left 0.25s ease; z-index: 50; }
+      .sidebar.open { left: 0; }
+      .main { margin-left: 0; }
+      .topbar { padding: 12px 16px; }
+      .content { padding: 14px; }
+
+      /* Stacked card layout — no horizontal scroll */
+      .table-card { background: transparent; box-shadow: none; border-radius: 0; }
+      thead { display: none; }
+      tbody tr {
+        display: block;
+        background: #fff;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        border-bottom: none;
+      }
+      td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 16px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      td:last-child { border-bottom: none; }
+      td::before {
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        flex-shrink: 0;
+        margin-right: 12px;
+      }
+      td.name { font-size: 1rem; }
+      td.actions { justify-content: flex-end; gap: 8px; }
+      td.actions::before { margin-right: auto; }
+
+      .modal { max-width: calc(100vw - 32px); margin: 16px; padding: 20px; }
+      .modal-actions { flex-direction: column-reverse; gap: 8px; }
+      .btn-cancel, .btn-save { width: 100%; text-align: center; padding: 11px; }
+    }
   </style>
 </head>
 <body>
@@ -194,9 +262,14 @@
     </div>
   </aside>
 
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <!-- Main -->
   <div class="main">
     <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h2>Shares</h2>
       <button class="btn-primary" onclick="openCreateModal()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -297,17 +370,17 @@
 
       tbody.innerHTML = allShares.map(s => `
         <tr id="row-${s.id}">
-          <td class="name">${esc(s.name)}</td>
-          <td class="url"><a href="/s/${esc(s.slug)}" target="_blank">/s/${esc(s.slug)}</a></td>
-          <td>${s.file_count}</td>
-          <td>${s.expires_at ? fmtDate(s.expires_at) : '<span style="color:#94a3b8">Never</span>'}</td>
-          <td>
+          <td class="name" data-label="Name">${esc(s.name)}</td>
+          <td class="url" data-label="Share URL"><a href="/s/${esc(s.slug)}" target="_blank">/s/${esc(s.slug)}</a></td>
+          <td data-label="Files">${s.file_count}</td>
+          <td data-label="Expires">${s.expires_at ? fmtDate(s.expires_at) : '<span style="color:#94a3b8">Never</span>'}</td>
+          <td data-label="Status">
             <button class="badge ${s.active ? 'active' : 'inactive'}"
               onclick="toggleActive(${s.id}, ${s.active ? 'true' : 'false'})">
               ${s.active ? 'Active' : 'Inactive'}
             </button>
           </td>
-          <td class="actions">
+          <td class="actions" data-label="Actions">
             <button class="btn-sm btn-edit" onclick="openEditModal(${s.id})">Edit</button>
             <button class="btn-sm btn-delete" onclick="deleteShare(${s.id}, '${escJs(s.name)}')">Delete</button>
           </td>
@@ -487,9 +560,22 @@
       return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
-    // Close modal on Escape
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('overlay').classList.contains('open')) closeModal();
+      else closeSidebar();
     });
   </script>
 </body>

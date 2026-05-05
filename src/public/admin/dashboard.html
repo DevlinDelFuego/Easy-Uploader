@@ -198,6 +198,44 @@
       color: #64748b;
       font-size: 0.9rem;
     }
+
+    .hamburger {
+      display: none;
+      align-items: center;
+      padding: 4px 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #374151;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .hamburger:hover { background: #f1f5f9; }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,0.45);
+      z-index: 49;
+    }
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 767px) {
+      .hamburger { display: flex; }
+      .sidebar { left: -240px; transition: left 0.25s ease; z-index: 50; }
+      .sidebar.open { left: 0; }
+      .main { margin-left: 0; }
+      .topbar { padding: 12px 16px; }
+      .content { padding: 16px; }
+      .stats { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+      .stat-card { padding: 16px; }
+      .stat-card .value { font-size: 1.4rem; }
+    }
+
+    @media (max-width: 400px) {
+      .stats { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -238,8 +276,13 @@
     </div>
   </aside>
 
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
   <div class="main">
     <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Open menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <h2>Dashboard</h2>
     </div>
 
@@ -273,6 +316,19 @@
         document.getElementById('statUploads').textContent = d.totalUploads;
         document.getElementById('statActive').textContent  = d.activeShares;
       });
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+
+    function closeSidebar() {
+      document.querySelector('.sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
   </script>
 </body>
 </html>
